@@ -24,12 +24,12 @@ type expr =
 
 (** Opérateurs de comparaisons *)
 type comp =
-| Eq (* = *)
-| Ne (* Not equal, <> *)
-| Lt (* Less than, < *)
-| Le (* Less or equal, <= *)
-| Gt (* Greater than, > *)
-| Ge (* Greater or equal, >= *)
+  | Eq (* = *)
+  | Ne (* Not equal, <> *)
+  | Lt (* Less than, < *)
+  | Le (* Less or equal, <= *)
+  | Gt (* Greater than, > *)
+  | Ge (* Greater or equal, >= *)
 
 (** Condition : comparaison entre deux expressions *)
 type cond = expr * comp * expr
@@ -48,7 +48,16 @@ type program = block
 
 
 (***********************************************************************)
+let line_parser filename = failwith "TODO"
+  (** découpe les fichiers en lignes et les met dans une int * string list *)
 
+let word_cutter line = 
+  split_on_char ' ' line
+(** prend une ligne de la liste et sépare les mots . retourne une string list  *)
+
+let indentation line = 
+  index_from line 0 (!' ')
+(** retourbe le nb de chars d'indentation d'une ligne  *)
 let read_polish (filename:string) : program = failwith "TODO"
 
 let print_polish (p:program) : unit = failwith "TODO"

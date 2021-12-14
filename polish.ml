@@ -102,36 +102,43 @@ let comp =
   |"<>"::l->Ne
 in (fetch_expr line), comp ,(fetch_expr line)
 ;;
-let rec read_polish (filename:string) : program = 
-  let (prog:(position*instr) list) =[] in
-  let lines = line_parser filename in
-  let rec read_line (lines:int * string list) (no:int) =
-    (*let curline =List.assoc no lines in ?*)
-    match  lines with (*TODO : FIX RECURSION WITH LINE NO*)
-    |x,l::l'->match word_cutter l with
-      |"Read" :: s ::[] -> (x,Read s)::(read_line lines (no+1))
-      |"Print" :: d' ->(x, Print (fetch_expr d'))::(read_line lines (no+1))
-      |"If"  :: d' -> If (fetch_cond d')BLOCK BLOCK
-      |"While" :: d' -> While fetch cond d' BLOCK
-    (*|"COMMENT"::d'-> Comment FETCH*)
-  ;;
-in read_line line 0 
+
+
+let rec read_polish (filename:string) : program = failwith "TODO"
 ;;
+(*|"COMMENT"::d'-> Comment FETCH*)
 
-let print_polish (p:program) : unit = failwith "TODO"
 
-let eval_polish (p:program) : unit = failwith "TODO"
 
-let usage () =
-  print_string "Polish : analyse statique d'un mini-langage\n";
-  print_string "usage: à documenter (TODO)\n"
+let rec parse_instr lines (no:int) =
+  (*let curline =List.assoc no lines in ?*)
+  let line = List.assoc no lines in
+  let indent = indentation line in
+  let cutline = word_cutter line in
+  match  cutline with 
+  |"READ" :: s ::[] -> (no,Read s)::(parse_instr lines (no+1))
+  |"PRINT" :: d' ->(x, Print (fetch_expr d'))::(read_line lines (no+1))
   
-  let main () =
-    match Sys.argv with
-    | [|_;"-reprint";file|] -> print_polish (read_polish file)
-    | [|_;"-eval";file|] -> eval_polish (read_polish file)
-    | _ -> usage ()
+  |"IF"  :: d' -> If (fetch_cond d')BLOCK BLOCK
+  |"WHILE" :: d' -> While fetch cond d' BLOCK
+  |"COMMENT" ::d'-> read_line lines (no+1))
+  |"a"::d'->
     
-    (* lancement de ce main *)
-    let () = main ()
     
+    let print_polish (p:program) : unit = failwith "TODO"
+    
+    let eval_polish (p:program) : unit = failwith "TODO"
+    
+    let usage () =
+      print_string "Polish : analyse statique d'un mini-langage\n";
+      print_string "usage: à documenter (TODO)\n"
+      
+      let main () =
+        match Sys.argv with
+        | [|_;"-reprint";file|] -> print_polish (read_polish file)
+        | [|_;"-eval";file|] -> eval_polish (read_polish file)
+        | _ -> usage ()
+        
+        (* lancement de ce main *)
+        let () = main ()
+        

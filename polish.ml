@@ -95,51 +95,7 @@ let factors:program = [
 let var_table = Hashtbl.create 123456;;
 let read_polish (filename:string) : program = failwith "TODO"
 
-let print_polish (p:program) : unit = failwith "TODO"
-let rec print_block p = 
-  match p with
-  |[]->();
-  |a::y -> match a with
-  |x,Set (n,e)->eval_set (eval_expr e) n ; eval_block y ;
-  |(x,Read(n))->"READ" ^ n ; eval_block y;
-  |x,If(c,bl,bl2)-> "IF" ^ "("^ ")" ; eval_block y ;
-  |x,Print(e)-> eval_print e ; eval_block y;
-  |x,While(c,b)->if eval_cond c then ( eval_block b ; eval_block p) else eval_block y ;
-in print_block p 
-;;
-
-let print_cond c =
-  let (exp,comp,exp2) = c in 
-  (eval_comp comp exp exp2) 
-;;
-
-let print_expr =
-  match exp with
-  |Num(n) -> n
-  |Var(s)-> s 
-  |Op(op,exp,exp2)->eval_op op exp exp2 
-  and 
-  print_op op exp exp2 :position= 
-  match op with
-  |Add -> eval_expr exp + eval_expr exp2  
-  |Sub -> eval_expr exp - eval_expr exp2 
-  |Mul -> eval_expr exp * eval_expr exp2  
-  |Div -> eval_expr exp / eval_expr exp2  
-  |Mod -> eval_expr exp  mod eval_expr exp2  
-;;
-
-
-let print_comp comp expr1 expr2 = 
-  match comp with 
-  | Eq -> "("^
-  | Ne -> 
-  | Lt ->   
-  | Le -> 
-  | Gt ->   
-  | Ge -> 
-;;
-
-
+(* FONCTIONS DE EVAL POLISH*)
 let eval_read n = 
   print_string "assigner la variable "; 
   print_string n;
@@ -147,7 +103,6 @@ let eval_read n =
   let input:int = read_int() in 
   Hashtbl.add var_table n input
 ;;
-
 
 let rec eval_expr exp =
   match exp with
@@ -169,8 +124,6 @@ let eval_print e =
   print_newline ();
 ;;
 
-
-
 let eval_comp comp expr1 expr2 = 
   match comp with 
   | Eq -> eval_expr expr1 = eval_expr expr2  
@@ -190,7 +143,6 @@ let eval_set i s :unit =
   Hashtbl.add var_table s i
 ;;
 
-
 let eval_polish (p:program) : unit = 
   let rec eval_block p = 
     match p with
@@ -204,6 +156,28 @@ let eval_polish (p:program) : unit =
   in eval_block p 
 ;;
 
+
+
+
+(*FONCTIONS DE READ POLISH*)
+let check_empty_block b =
+  match b with
+  |[] ->true; 
+  |b-> false
+;;
+
+let print_polish (p:program) : unit = 
+let rec print_block p = 
+  match p with
+  |[]->();
+  |a::y -> match a with
+  |x,Set (n,e)->print_string (n ^" := "); (print_expr e) ; print_block y ;
+  |x,Read(n)->print_string("READ " ^ n); print_block y;
+  |x,If(c,bl,bl2)-> print_string "IF "; print_cond c ; print_newline(); print_block bl ;if check_empty_block bl2 then print_string "ELSE"; print_newline(); print_block bl2; print_block y ;
+  |x,Print(e)-> print_string "PRINT "; print_expr e ; print_block y;
+  |x,While(c,b)->print_string "WHILE "; print_cond c ; print_block b ;print_newline(); print_block y ;
+in print_block p
+;;
 
 
 

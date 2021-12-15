@@ -91,56 +91,68 @@ let factors:program = [
 ]
 
 (***********************************************************************)
-let (var_list:(string * int)list) = []
-;;
+let var_table = Hashtbl.create 123456;;
 let read_polish (filename:string) : program = failwith "TODO"
 
 let print_polish (p:program) : unit = failwith "TODO"
 
+let eval_read n = 
+  print_string "assigner la variable "; 
+  print_string n;
+  print_newline();
+  let input:int = read_int() in 
+  Hashtbl.add var_table n input
+;;
+
+
+let rec eval_expr e =
+  match e with
+  |Num(n) -> n
+  |Var(s)->Hashtbl.find var_table s 
+  |Op(o,e,e2)->eval_op o e e2 
+  and 
+  eval_op o e e2 :position= 
+  match o with
+  |Add -> eval_expr e + eval_expr e2  
+  |Sub -> eval_expr e - eval_expr e2 
+  |Mul -> eval_expr e * eval_expr e2  
+  |Div -> eval_expr e / eval_expr e2  
+  |Mod -> eval_expr e  mod eval_expr e2  
+;;
+
+let eval_print e = 
+  print_int (eval_expr e);
+;;
+
+
 let eval_polish (p:program) : unit = 
   let rec eval_block p = 
     match p with
-    |[]-> failwith "vide";
-    |a::y -> 
-      match a with
-      |x,Set (n,e)->eval_expr e;(eval_block y);
-      |(x,Read(n))->(eval_read n) ;(eval_block y);
-      |x,If(c,b,b')->eval_cond eval_block b eval_block b';(eval_block y);
-      |x,Print(e)->eval_print;(eval_block y);
-      |x,While(c,b)->eval_cond c eval_block b;(eval_block y);
-    in eval_block p 
-  ;;
+    |[]->();
+    |a::y -> match a with
+    |x,Set (n,e)->eval_set (eval_expr e) n; (eval_block y);
+    |(x,Read(n))->(eval_read n ) ;(eval_block y);
+    |x,If(c,b,b')-> if(eval_cond c ) then (eval_block b) else (eval_block b') ;(eval_block y);
+    |x,Print(e)-> eval_print e ;(eval_block y);
+    (*|x,While(c,b)->eval_cond c eval_block b;(eval_block y);*) 
+    |_->()
+  in eval_block p 
+;;
+
+
+
+
+
+let usage () =
+  print_string "Polish : analyse statique d'un mini-langage\n";
+  print_string "usage: à documenter (TODO)\n"
   
-  
-  
-  
-  
-  let rec eval_block2 p n = 
-    let b = List.assoc n p in
-    match b with 
-    |
-  ;;
-  let rec eval_block p = 
-    match p with
-    |x,Set (n,e)->eval_expr e;
-    |(x,Read(n))::p'->(eval_read n) 
-    |x,If(c,b,b')->eval_cond eval_block b eval_block b';
-    |x,Print(e)->eval_print;
-    |x,While(c,b)->eval_cond c eval_block b;
-    |x,block->eval_block;
-    (eval_block p')
-    let eval_polish (p:program) : unit = failwith "TODO"
+  let main () =
+    match Sys.argv with
+    | [|_;"-reprint";file|] -> print_polish (read_polish file)
+    | [|_;"-eval";file|] -> eval_polish (abs)
+    | _ -> eval_polish (abs)
     
-    let usage () =
-      print_string "Polish : analyse statique d'un mini-langage\n";
-      print_string "usage: à documenter (TODO)\n"
-      
-      let main () =
-        match Sys.argv with
-        | [|_;"-reprint";file|] -> print_polish (read_polish file)
-        | [|_;"-eval";file|] -> eval_polish (read_polish file)
-        | _ -> usage ()
-        
-        (* lancement de ce main *)
-        let () = main ()
-        
+    (* lancement de ce main *)
+    let () = main ()
+    

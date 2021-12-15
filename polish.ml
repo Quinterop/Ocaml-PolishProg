@@ -45,7 +45,7 @@ and block = (position * instr) list
 
 (** Un programme Polish est un bloc d'instructions *)
 type program = block
-
+(*
 let abs:program = [
 (1, Read("n"));
 (2, If(
@@ -89,12 +89,95 @@ let factors:program = [
 ]
 ));
 ]
-
+*)
 (***********************************************************************)
-let var_table = Hashtbl.create 123456;;
+(* FONCTIONS DE READ POLISH*)
+(* découpe les fichiers en lignes et les met dans une int * string list. *)
+let rec add_lines input (no:int) lines  =
+try
+  add_lines(input)(no+1) (List.cons (no,(input_line input))lines)
+with End_of_file ->close_in input;lines
+;;
+
+let line_parser filename =
+  try
+    let ic = open_in filename in 
+    let (lines: (int * string) list) = [] in
+    List.rev (add_lines ic 1 lines )
+  with e ->failwith "fichier non ouvrable"
+;;
+let word_cutter (line:string) :string list =  
+  String.split_on_char ' ' line
+;;
+
+(*prend un string et renvoie un int correspondant aux espaces avant le premier autre caractere*)
+let tabify s = List.init (String.length s) (String.get s)
+;;
+let indentation s= 
+let t = tabify s in
+let rec indent_aux t n =
+  match t with
+  | [] -> n
+  |c::t'-> if c =' ' then indent_aux (t') (n+1) else n in 
+  indent_aux t 0
+;;
+let get_line lines no = 
+  List.assoc no lines 
+;;
+
+(*les fonctions de read marchent jusqu'ici*)
+
+let fetch_expr line = 
+  match line with
+  |s::l'->if Str.string_match (Str.regexp "[0-9]+") s 0 then Num (int_of_string s) else Var s
+  |[]->failwith "vide"
+;;
+
+let fetch_cond line =
+  let comp =
+    match line with
+    |"="::l->Eq
+    |"<"::l->Lt
+    |"<="::l->Le
+    |">"::l->Gt
+    |">="::l->Ge
+    |"<>"::l->Ne
+    |e::l->failwith "mauvais arg"
+    |[]->failwith "vide"
+  in (fetch_expr line), comp ,(fetch_expr line)
+;;
+
+
 let read_polish (filename:string) : program = failwith "TODO"
+;;
+(*|"COMMENT"::d'-> Comment FETCH*)
+
+let parse_if d =failwith "TODO";;
+
+let parse_while d = failwith "TODO";;
+
+let jump_comment d = failwith "TODO"
+
+let read_line l no :int*instr =failwith "TODO"
+
+let rec parse_instr lines (no:int) =
+  (*let curline =List.assoc no lines in ?*)
+  let line = List.assoc no lines in
+  let indent = indentation line in
+  let cutline = word_cutter line in
+  match  cutline with 
+  |"READ" :: s ::d -> (no,Read s)::(parse_instr lines (no+1))
+  |"READ" ::[]-> failwith "vide"
+  |"PRINT" :: d' ->(no, Print (fetch_expr d'))::(read_line lines (no+1))::[]
+  |"IF"  :: d' -> parse_if d'
+  |"WHILE" :: d' -> parse_while d'
+  |"COMMENT" ::d'-> jump_comment d'
+  |s::d'->failwith "vide";
+  |[]->failwith "vide";
+;;    
 
 (* FONCTIONS DE EVAL POLISH*)
+let var_table = Hashtbl.create 123456;;
 let eval_read n =
   print_string "assigner la variable ";
   print_string n;
@@ -158,7 +241,7 @@ let eval_polish (p:program) : unit =
 
 
 
-(*FONCTIONS DE READ POLISH*)
+(*FONCTIONS DE PRINT POLISH*)
 let rec print_expr exp=
   match exp with
   |Num(n) ->print_int n
@@ -217,8 +300,8 @@ let usage () =
     match Sys.argv with
     | [|_;"-reprint";file|] -> print_polish (read_polish file)
     | [|_;"-eval";file|] -> eval_polish (read_polish file)
-    | _ -> print_polish(factors)(*usage ()*)
-
+    | _ ->usage ()
+  
 
     (* lancement de ce main *)
     let () = main ()

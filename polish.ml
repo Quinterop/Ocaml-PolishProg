@@ -69,7 +69,7 @@ let word_cutter (line:string) :string list =
 (*prend un string et renvoie un int correspondant aux espaces avant le premier autre caractere*)
 let tabify s = List.init (String.length s) (String.get s)
 ;;
-let rec indentation s= 
+let indentation s= 
 let t = tabify s in
 let rec indent_aux t n =
   match t with
@@ -78,37 +78,43 @@ let rec indent_aux t n =
   indent_aux t 0
 ;;
 let get_line lines no = 
-  List.assoc_opt no lines 
+  List.assoc no lines 
 ;;
+
+(*les fonctions de read marchent jusqu'ici*)
 
 let fetch_expr line = 
   match line with
   |s::l'->if Str.string_match (Str.regexp "[0-9]+") s 0 then Num (int_of_string s) else Var s
-  (* |"+"::s::l'->Op (Add)()()
-  |"-"::s::l'->Op (Sub)()()
-  |"*"::s::l'->Op (Mul)()()
-  |"/"::s::l'->Op (Div)()()
-  |"%"::s::l'->Op (Mod)()()
-  *)
+  |[]->failwith "vide"
 ;;
-let fetch_cond line :cond=
-let comp =
-  match line with
-  |"="::l->Eq
-  |"<"::l->Lt
-  |"<="::l->Le
-  |">"::l->Gt
-  |">="::l->Ge
-  |"<>"::l->Ne
-in (fetch_expr line), comp ,(fetch_expr line)
+
+let fetch_cond line =
+  let comp =
+    match line with
+    |"="::l->Eq
+    |"<"::l->Lt
+    |"<="::l->Le
+    |">"::l->Gt
+    |">="::l->Ge
+    |"<>"::l->Ne
+    |e::l->failwith "mauvais arg"
+    |[]->failwith "vide"
+  in (fetch_expr line), comp ,(fetch_expr line)
 ;;
 
 
-let rec read_polish (filename:string) : program = failwith "TODO"
+let read_polish (filename:string) : program = failwith "TODO"
 ;;
 (*|"COMMENT"::d'-> Comment FETCH*)
 
+let parse_if d =failwith "TODO";;
 
+let parse_while d = failwith "TODO";;
+
+let jump_comment d = failwith "TODO"
+
+let read_line l no :int*instr =failwith "TODO"
 
 let rec parse_instr lines (no:int) =
   (*let curline =List.assoc no lines in ?*)
@@ -116,29 +122,30 @@ let rec parse_instr lines (no:int) =
   let indent = indentation line in
   let cutline = word_cutter line in
   match  cutline with 
-  |"READ" :: s ::[] -> (no,Read s)::(parse_instr lines (no+1))
-  |"PRINT" :: d' ->(x, Print (fetch_expr d'))::(read_line lines (no+1))
+  |"READ" :: s ::d -> (no,Read s)::(parse_instr lines (no+1))
+  |"READ" ::[]-> failwith "vide"
+  |"PRINT" :: d' ->(no, Print (fetch_expr d'))::(read_line lines (no+1))::[]
+  |"IF"  :: d' -> parse_if d'
+  |"WHILE" :: d' -> parse_while d'
+  |"COMMENT" ::d'-> jump_comment d'
+  |s::d'->failwith "vide";
+  |[]->failwith "vide";
+;;    
+
+let print_polish (p:program) : unit = failwith "TODO"
+
+let eval_polish (p:program) : unit = failwith "TODO"
+
+let usage () =
+  print_string "Polish : analyse statique d'un mini-langage\n";
+  print_string "usage: à documenter (TODO)\n"
   
-  |"IF"  :: d' -> If (fetch_cond d')BLOCK BLOCK
-  |"WHILE" :: d' -> While fetch cond d' BLOCK
-  |"COMMENT" ::d'-> read_line lines (no+1))
-  |"a"::d'->
+  let main () =
+    match Sys.argv with
+    | [|_;"-reprint";file|] -> print_polish (read_polish file)
+    | [|_;"-eval";file|] -> eval_polish (read_polish file)
+    | _ -> usage ()
     
+    (* lancement de ce main *)
+    let () = main ()
     
-    let print_polish (p:program) : unit = failwith "TODO"
-    
-    let eval_polish (p:program) : unit = failwith "TODO"
-    
-    let usage () =
-      print_string "Polish : analyse statique d'un mini-langage\n";
-      print_string "usage: à documenter (TODO)\n"
-      
-      let main () =
-        match Sys.argv with
-        | [|_;"-reprint";file|] -> print_polish (read_polish file)
-        | [|_;"-eval";file|] -> eval_polish (read_polish file)
-        | _ -> usage ()
-        
-        (* lancement de ce main *)
-        let () = main ()
-        

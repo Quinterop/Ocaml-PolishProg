@@ -96,6 +96,49 @@ let var_table = Hashtbl.create 123456;;
 let read_polish (filename:string) : program = failwith "TODO"
 
 let print_polish (p:program) : unit = failwith "TODO"
+let rec print_block p = 
+  match p with
+  |[]->();
+  |a::y -> match a with
+  |x,Set (n,e)->eval_set (eval_expr e) n ; eval_block y ;
+  |(x,Read(n))->"READ" ^ n ; eval_block y;
+  |x,If(c,bl,bl2)-> "IF" ^ "("^ ")" ; eval_block y ;
+  |x,Print(e)-> eval_print e ; eval_block y;
+  |x,While(c,b)->if eval_cond c then ( eval_block b ; eval_block p) else eval_block y ;
+in print_block p 
+;;
+
+let print_cond c =
+  let (exp,comp,exp2) = c in 
+  (eval_comp comp exp exp2) 
+;;
+
+let print_expr =
+  match exp with
+  |Num(n) -> n
+  |Var(s)-> s 
+  |Op(op,exp,exp2)->eval_op op exp exp2 
+  and 
+  print_op op exp exp2 :position= 
+  match op with
+  |Add -> eval_expr exp + eval_expr exp2  
+  |Sub -> eval_expr exp - eval_expr exp2 
+  |Mul -> eval_expr exp * eval_expr exp2  
+  |Div -> eval_expr exp / eval_expr exp2  
+  |Mod -> eval_expr exp  mod eval_expr exp2  
+;;
+
+
+let print_comp comp expr1 expr2 = 
+  match comp with 
+  | Eq -> "("^
+  | Ne -> 
+  | Lt ->   
+  | Le -> 
+  | Gt ->   
+  | Ge -> 
+;;
+
 
 let eval_read n = 
   print_string "assigner la variable "; 

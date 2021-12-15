@@ -96,6 +96,35 @@ let read_polish (filename:string) : program = failwith "TODO"
 
 let print_polish (p:program) : unit = failwith "TODO"
 
+let eval_read n = 
+  print_string "assigner la variable "; 
+  print_string n;
+  print_newline();
+  let input:int = read_int() in 
+  Hashtbl.add var_table n input
+;;
+
+
+let rec eval_expr e =
+  match e with
+  |Num(n) -> n
+  |Var(s)->Hashtbl.find var_table s 
+  |Op(o,e,e2)->eval_op o e e2 
+  and 
+  eval_op o e e2 :position= 
+  match o with
+  |Add -> eval_expr e + eval_expr e2  
+  |Sub -> eval_expr e - eval_expr e2 
+  |Mul -> eval_expr e * eval_expr e2  
+  |Div -> eval_expr e / eval_expr e2  
+  |Mod -> eval_expr e  mod eval_expr e2  
+;;
+
+let eval_print e = 
+  print_int (eval_expr e);
+;;
+
+
 
 let eval_comp comp expr1 expr2 = 
   match comp with 

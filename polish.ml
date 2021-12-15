@@ -159,6 +159,34 @@ let eval_polish (p:program) : unit =
 
 
 (*FONCTIONS DE READ POLISH*)
+let rec print_expr exp=
+  match exp with
+  |Num(n) ->print_int n
+  |Var(s)->print_string s 
+  |Op(op,exp,exp2)->print_op op exp exp2 ;
+  and 
+  print_op op exp exp2 = 
+  match op with
+  |Sub -> print_string "- "; print_expr exp;  print_string " "; print_expr exp2
+  |Mul -> print_string "* "; print_expr exp;  print_string " "; print_expr exp2
+  |Div -> print_string "/ "; print_expr exp;  print_string " "; print_expr exp2
+  |Add -> print_string "+ "; print_expr exp;  print_string " "; print_expr exp2
+  |Mod -> print_string "% "; print_expr exp; print_string " "; print_expr exp2
+  ;;
+  
+  let print_comp comp expr1 expr2 = 
+    match comp with 
+    | Eq -> print_expr expr1 ;print_string " = ";print_expr expr2
+    | Ne -> print_expr expr1 ;print_string " <> " ;print_expr expr2 
+    | Lt -> print_expr expr1 ;print_string " < ";print_expr expr2 
+    | Le -> print_expr expr1 ;print_string " <= " ;print_expr expr2 
+    | Gt -> print_expr expr1 ;print_string " > ";print_expr expr2 
+    | Ge -> print_expr expr1 ;print_string " >= " ;print_expr expr2 
+  ;;
+  let print_cond c :unit=
+    let (exp,comp,exp2) = c in 
+    print_comp comp exp exp2
+  ;;
 
 let check_empty_block b =
   match b with

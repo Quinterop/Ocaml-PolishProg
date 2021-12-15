@@ -45,6 +45,8 @@ and block = (position * instr) list
 
 (** Un programme Polish est un bloc d'instructions *)
 type program = block
+
+
 (*
 let abs:program = [
 (1, Read("n"));
@@ -89,7 +91,9 @@ let factors:program = [
 ]
 ));
 ]
+
 *)
+
 (***********************************************************************)
 (* FONCTIONS DE READ POLISH*)
 (* découpe les fichiers en lignes et les met dans une int * string list. *)
@@ -126,7 +130,7 @@ let get_line lines no =
 ;;
 
 (*les fonctions de read marchent jusqu'ici*)
-
+(*
 let fetch_expr line = 
   match line with
   |s::l'->if Str.string_match (Str.regexp "[0-9]+") s 0 then Num (int_of_string s) else Var s
@@ -148,8 +152,7 @@ let fetch_cond line =
 ;;
 
 
-let read_polish (filename:string) : program = failwith "TODO"
-;;
+
 (*|"COMMENT"::d'-> Comment FETCH*)
 
 let parse_if d =failwith "TODO";;
@@ -175,7 +178,7 @@ let rec parse_instr lines (no:int) =
   |s::d'->failwith "vide";
   |[]->failwith "vide";
 ;;    
-
+*)
 (* FONCTIONS DE EVAL POLISH*)
 let var_table = Hashtbl.create 123456;;
 let eval_read n =
@@ -243,33 +246,33 @@ let eval_polish (p:program) : unit =
 
 (*FONCTIONS DE PRINT POLISH*)
 let rec print_expr exp=
-  match exp with
-  |Num(n) ->print_int n
-  |Var(s)->print_string s 
-  |Op(op,exp,exp2)->print_op op exp exp2 ;
-  and 
-  print_op op exp exp2 = 
-  match op with
-  |Sub -> print_string "- "; print_expr exp;  print_string " "; print_expr exp2
-  |Mul -> print_string "* "; print_expr exp;  print_string " "; print_expr exp2
-  |Div -> print_string "/ "; print_expr exp;  print_string " "; print_expr exp2
-  |Add -> print_string "+ "; print_expr exp;  print_string " "; print_expr exp2
-  |Mod -> print_string "% "; print_expr exp; print_string " "; print_expr exp2
-  ;;
-  
-  let print_comp comp expr1 expr2 = 
-    match comp with 
-    | Eq -> print_expr expr1 ;print_string " = ";print_expr expr2
-    | Ne -> print_expr expr1 ;print_string " <> " ;print_expr expr2 
-    | Lt -> print_expr expr1 ;print_string " < ";print_expr expr2 
-    | Le -> print_expr expr1 ;print_string " <= " ;print_expr expr2 
-    | Gt -> print_expr expr1 ;print_string " > ";print_expr expr2 
-    | Ge -> print_expr expr1 ;print_string " >= " ;print_expr expr2 
-  ;;
-  let print_cond c :unit=
-    let (exp,comp,exp2) = c in 
-    print_comp comp exp exp2
-  ;;
+match exp with
+|Num(n) ->print_int n
+|Var(s)->print_string s 
+|Op(op,exp,exp2)->print_op op exp exp2 ;
+and 
+print_op op exp exp2 = 
+match op with
+|Sub -> print_string "- "; print_expr exp;  print_string " "; print_expr exp2
+|Mul -> print_string "* "; print_expr exp;  print_string " "; print_expr exp2
+|Div -> print_string "/ "; print_expr exp;  print_string " "; print_expr exp2
+|Add -> print_string "+ "; print_expr exp;  print_string " "; print_expr exp2
+|Mod -> print_string "% "; print_expr exp; print_string " "; print_expr exp2
+;;
+
+let print_comp comp expr1 expr2 = 
+  match comp with 
+  | Eq -> print_expr expr1 ;print_string " = ";print_expr expr2
+  | Ne -> print_expr expr1 ;print_string " <> " ;print_expr expr2 
+  | Lt -> print_expr expr1 ;print_string " < ";print_expr expr2 
+  | Le -> print_expr expr1 ;print_string " <= " ;print_expr expr2 
+  | Gt -> print_expr expr1 ;print_string " > ";print_expr expr2 
+  | Ge -> print_expr expr1 ;print_string " >= " ;print_expr expr2 
+;;
+let print_cond c :unit=
+let (exp,comp,exp2) = c in 
+print_comp comp exp exp2
+;;
 
 let check_empty_block b =
   match b with
@@ -291,17 +294,20 @@ let print_polish (p:program) : unit =
 ;;
 
 
+let read_polish (filename:string) : program = failwith "TODO"
 
 let usage () =
+  (*eval_polish abs;*) (*eval_polish factors;*) (*print_polish abs;*) (*print_polish factors;*)
   print_string "Polish : analyse statique d'un mini-langage\n";
   print_string "usage: à documenter (TODO)\n"
-
+  
   let main () =
     match Sys.argv with
     | [|_;"-reprint";file|] -> print_polish (read_polish file)
     | [|_;"-eval";file|] -> eval_polish (read_polish file)
     | _ ->usage ()
-  
-
+    
+    
     (* lancement de ce main *)
     let () = main ()
+        

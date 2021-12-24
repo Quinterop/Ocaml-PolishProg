@@ -128,6 +128,7 @@ let rec indent_aux t n =
 let get_line lines no = 
   List.assoc no lines 
 ;;
+<<<<<<< HEAD
 let read_polish (filename:string) : program = 
   let file = line_parser filename in 
   match file with 
@@ -142,6 +143,11 @@ let read_polish (filename:string) : program =
   
 ;;
 
+=======
+
+(*les fonctions de read marchent jusqu'ici*)
+(*
+>>>>>>> 80e85171fc24db923763214cd4d465d76c7f790c
 let fetch_expr line = 
   match line with
   |s::l'->match s with 
@@ -324,6 +330,7 @@ let print_polish (p:program) : unit =
 ;;
 
 
+let read_polish (filename:string) : program = failwith "TODO"
 
 let usage () =
   (*eval_polish abs;*) (*eval_polish factors;*) (*print_polish abs;*) (*print_polish factors;*)
@@ -338,4 +345,9 @@ let usage () =
     
     
     (* lancement de ce main *)
+<<<<<<< HEAD
     let () = main ()
+=======
+    let () = main ()
+        
+>>>>>>> 80e85171fc24db923763214cd4d465d76c7f790c

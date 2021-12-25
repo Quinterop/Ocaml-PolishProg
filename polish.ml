@@ -128,7 +128,7 @@ let rec indent_aux t n =
 let get_line lines no = 
   List.assoc no lines 
 ;;
-<<<<<<< HEAD
+(*
 let read_polish (filename:string) : program = 
   let file = line_parser filename in 
   match file with 
@@ -142,50 +142,61 @@ let read_polish (filename:string) : program =
   |[]-> failwith "vide"
   
 ;;
-
-=======
-
-(*les fonctions de read marchent jusqu'ici*)
-(*
->>>>>>> 80e85171fc24db923763214cd4d465d76c7f790c
-let fetch_expr line = 
+*)
+let fetch_expr line :expr= 
   match line with
-  |s::l'->match s with 
-  |
   |[]->failwith "vide"
 ;;
+let fetch_comp str acc=
+  match str with
+  |"="->Eq
+  |"<"->Lt
+  |"<="->Le
+  |">"->Gt
+  |">="->Ge
+  |"<>"->Ne
+  |e->failwith "mauvais arg"
+;;
+
+let rec fetch_cond  acc line :cond= 
+match line with
+|"="::l'->(fetch_expr acc, Eq,fetch_expr l')
+|"<"::l'->(fetch_expr acc, Lt,fetch_expr l')
+|"<="::l'->(fetch_expr acc, Le,fetch_expr l')
+|">"::l'->(fetch_expr acc, Gt,fetch_expr l')
+|">="::l'->(fetch_expr acc, Ge,fetch_expr l')
+|"<>"::l'->(fetch_expr acc,Ne ,fetch_expr l')
+|s::l'->fetch_cond  (acc@[s]) l';
+
+;;
+
+let parse_if lines = 
+
 let rec parse_instr lines (no:int) (no2:int)=
-  (*let curline =List.assoc no lines in ?*)
-  let line = List.assoc no lines in
-  let indent = indentation line in
-  let cutline = word_cutter line in
-  match  cutline with 
-  |"READ" :: s ::d -> (no2,Read s)::(parse_instr lines (no+1))
-  |"READ" ::[]-> failwith "vide"
-  |"PRINT" :: d' ->(no2, Print (fetch_expr d'))::(read_line lines (no+1))
-  |"IF"  :: d' -> parse_if d'
-  |"WHILE" :: d' -> parse_while d'
-  |"COMMENT" ::d'-> try List.assoc no+1 lines;parse_instr lines no+1 no2 with Not_found ->[]
-  |s::d::l'->no2,Set (d(fetch_expr l'))
-  |s::d'->failwith "vide";
-  |[]->failwith "vide";
+(*let curline =List.assoc no lines in ?*)
+let line = List.assoc no lines in
+let indent = indentation line in
+let cutline = word_cutter line in
+match  cutline with 
+|"READ" :: s ::d -> (no2,Read s)::(parse_instr lines (no+1))
+|"READ" ::[]-> failwith "vide"
+|"PRINT" :: d' ->(no2, Print (fetch_expr d'))::(parse_instr lines (no+1) (no2+1))
+|"IF" :: d' -> (no2,If((fetch_cond [] d'),parse_instr lines (no+1) (no2+1),parse_instr lines (no+1) (no2+1)))::parse_instr lines (no+1) (no2+1) (*CASSE*)
+|"WHILE" :: d' -> parse_while d'
+|"COMMENT" ::d'-> try
+   let test = List.assoc (no+1) lines in 
+   (parse_instr lines (no+1) no2) with Not_found ->[];
+|s :: d :: l'->no2,Set (d(fetch_expr l'))
+|s::d'->failwith "vide";
+|[]->failwith "vide";
+;;
 (*les fonctions de read marchent jusqu'ici*)
 
 
 (*
-let fetch_cond line =
-  let comp =
-    match line with
-    |"="::l->Eq
-    |"<"::l->Lt
-    |"<="::l->Le
-    |">"::l->Gt
-    |">="::l->Ge
-    |"<>"::l->Ne
-    |e::l->failwith "mauvais arg"
-    |[]->failwith "vide"
-  in (fetch_expr line), comp ,(fetch_expr line)
-;;
+
+
+
 
 
 
@@ -345,9 +356,6 @@ let usage () =
     
     
     (* lancement de ce main *)
-<<<<<<< HEAD
     let () = main ()
-=======
-    let () = main ()
-        
->>>>>>> 80e85171fc24db923763214cd4d465d76c7f790c
+    
+    

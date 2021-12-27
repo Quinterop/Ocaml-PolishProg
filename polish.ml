@@ -96,7 +96,7 @@ let factors:program = [
 
 (***********************************************************************)
 (* FONCTIONS DE READ POLISH*)
-(* découpe les fichiers en lignes et les met dans une int * string list. 
+(*découpe les fichiers en lignes et les met dans une int * string list. 
 let rec add_lines input (no:int) lines  =
 try
   add_lines(input)(no+1) (List.cons (no,(input_line input))lines)
@@ -225,6 +225,7 @@ let rec parse_instr lines (no:int) =
   |s::d'->failwith "vide";
   |[]->failwith "vide";
 ;;    
+*)
 *)
 (* FONCTIONS DE EVAL POLISH*)
 let var_table = Hashtbl.create 123456;;

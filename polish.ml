@@ -44,9 +44,9 @@ type instr =
 and block = (position * instr) list
 
 (** Un programme Polish est un bloc d'instructions *)
+
 type program = block
-
-
+let read_polish (filename:string) : program = failwith "TODO"
 (*
 let abs:program = [
 (1, Read("n"));
@@ -96,7 +96,7 @@ let factors:program = [
 
 (***********************************************************************)
 (* FONCTIONS DE READ POLISH*)
-(* découpe les fichiers en lignes et les met dans une int * string list. *)
+(* découpe les fichiers en lignes et les met dans une int * string list. 
 let rec add_lines input (no:int) lines  =
 try
   add_lines(input)(no+1) (List.cons (no,(input_line input))lines)

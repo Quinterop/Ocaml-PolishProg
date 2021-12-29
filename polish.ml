@@ -91,10 +91,12 @@ let factors:program = [
 ]
 ));
 ]
+
 *)
+
 (***********************************************************************)
 (* FONCTIONS DE READ POLISH*)
-(* découpe les fichiers en lignes et les met dans une int * string list. 
+(*découpe les fichiers en lignes et les met dans une int * string list. 
 let rec add_lines input (no:int) lines  =
 try
   add_lines(input)(no+1) (List.cons (no,(input_line input))lines)
@@ -126,32 +128,78 @@ let rec indent_aux t n =
 let get_line lines no = 
   List.assoc no lines 
 ;;
-
-(*les fonctions de read marchent jusqu'ici*)
-
-let fetch_expr line = 
+(*
+let read_polish (filename:string) : program = 
+  let file = line_parser filename in 
+  match file with 
+  |(x,y) :: l'-> match (word_cutter y) with
+  |"READ" ::l'-> (x,Read s)::(parse_instr lines (x+1));
+  |"READ" ::[]-> failwith "vide";
+  (*|"PRINT"::l'->;*)
+  |"IF"::l'->;
+  |"WHILE"::l'->;
+  |"COMMENT" ::l'->;
+  |[]-> failwith "vide"
+  
+;;
+*)
+let fetch_expr line :expr= 
   match line with
-  |s::l'->if Str.string_match (Str.regexp "[0-9]+") s 0 then Num (int_of_string s) else Var s
   |[]->failwith "vide"
 ;;
-
-let fetch_cond line =
-  let comp =
-    match line with
-    |"="::l->Eq
-    |"<"::l->Lt
-    |"<="::l->Le
-    |">"::l->Gt
-    |">="::l->Ge
-    |"<>"::l->Ne
-    |e::l->failwith "mauvais arg"
-    |[]->failwith "vide"
-  in (fetch_expr line), comp ,(fetch_expr line)
+let fetch_comp str acc=
+  match str with
+  |"="->Eq
+  |"<"->Lt
+  |"<="->Le
+  |">"->Gt
+  |">="->Ge
+  |"<>"->Ne
+  |e->failwith "mauvais arg"
 ;;
 
-
+let rec fetch_cond  acc line :cond= 
+match line with
+|"="::l'->(fetch_expr acc, Eq,fetch_expr l')
+|"<"::l'->(fetch_expr acc, Lt,fetch_expr l')
+|"<="::l'->(fetch_expr acc, Le,fetch_expr l')
+|">"::l'->(fetch_expr acc, Gt,fetch_expr l')
+|">="::l'->(fetch_expr acc, Ge,fetch_expr l')
+|"<>"::l'->(fetch_expr acc,Ne ,fetch_expr l')
+|s::l'->fetch_cond  (acc@[s]) l';
 
 ;;
+
+let parse_if lines = 
+
+let rec parse_instr lines (no:int) (no2:int)=
+(*let curline =List.assoc no lines in ?*)
+let line = List.assoc no lines in
+let indent = indentation line in
+let cutline = word_cutter line in
+match  cutline with 
+|"READ" :: s ::d -> (no2,Read s)::(parse_instr lines (no+1))
+|"READ" ::[]-> failwith "vide"
+|"PRINT" :: d' ->(no2, Print (fetch_expr d'))::(parse_instr lines (no+1) (no2+1))
+|"IF" :: d' -> (no2,If((fetch_cond [] d'),parse_instr lines (no+1) (no2+1),parse_instr lines (no+1) (no2+1)))::parse_instr lines (no+1) (no2+1) (*CASSE*)
+|"WHILE" :: d' -> parse_while d'
+|"COMMENT" ::d'-> try
+   let test = List.assoc (no+1) lines in 
+   (parse_instr lines (no+1) no2) with Not_found ->[];
+|s :: d :: l'->no2,Set (d(fetch_expr l'))
+|s::d'->failwith "vide";
+|[]->failwith "vide";
+;;
+(*les fonctions de read marchent jusqu'ici*)
+
+
+(*
+
+
+
+
+
+
 (*|"COMMENT"::d'-> Comment FETCH*)
 
 let parse_if d =failwith "TODO";;
@@ -177,6 +225,7 @@ let rec parse_instr lines (no:int) =
   |s::d'->failwith "vide";
   |[]->failwith "vide";
 ;;    
+*)
 *)
 (* FONCTIONS DE EVAL POLISH*)
 let var_table = Hashtbl.create 123456;;
@@ -245,33 +294,33 @@ let eval_polish (p:program) : unit =
 
 (*FONCTIONS DE PRINT POLISH*)
 let rec print_expr exp=
-  match exp with
-  |Num(n) ->print_int n
-  |Var(s)->print_string s 
-  |Op(op,exp,exp2)->print_op op exp exp2 ;
-  and 
-  print_op op exp exp2 = 
-  match op with
-  |Sub -> print_string "- "; print_expr exp;  print_string " "; print_expr exp2
-  |Mul -> print_string "* "; print_expr exp;  print_string " "; print_expr exp2
-  |Div -> print_string "/ "; print_expr exp;  print_string " "; print_expr exp2
-  |Add -> print_string "+ "; print_expr exp;  print_string " "; print_expr exp2
-  |Mod -> print_string "% "; print_expr exp; print_string " "; print_expr exp2
-  ;;
-  
-  let print_comp comp expr1 expr2 = 
-    match comp with 
-    | Eq -> print_expr expr1 ;print_string " = ";print_expr expr2
-    | Ne -> print_expr expr1 ;print_string " <> " ;print_expr expr2 
-    | Lt -> print_expr expr1 ;print_string " < ";print_expr expr2 
-    | Le -> print_expr expr1 ;print_string " <= " ;print_expr expr2 
-    | Gt -> print_expr expr1 ;print_string " > ";print_expr expr2 
-    | Ge -> print_expr expr1 ;print_string " >= " ;print_expr expr2 
-  ;;
-  let print_cond c :unit=
-    let (exp,comp,exp2) = c in 
-    print_comp comp exp exp2
-  ;;
+match exp with
+|Num(n) ->print_int n
+|Var(s)->print_string s 
+|Op(op,exp,exp2)->print_op op exp exp2 ;
+and 
+print_op op exp exp2 = 
+match op with
+|Sub -> print_string "- "; print_expr exp;  print_string " "; print_expr exp2
+|Mul -> print_string "* "; print_expr exp;  print_string " "; print_expr exp2
+|Div -> print_string "/ "; print_expr exp;  print_string " "; print_expr exp2
+|Add -> print_string "+ "; print_expr exp;  print_string " "; print_expr exp2
+|Mod -> print_string "% "; print_expr exp; print_string " "; print_expr exp2
+;;
+
+let print_comp comp expr1 expr2 = 
+  match comp with 
+  | Eq -> print_expr expr1 ;print_string " = ";print_expr expr2
+  | Ne -> print_expr expr1 ;print_string " <> " ;print_expr expr2 
+  | Lt -> print_expr expr1 ;print_string " < ";print_expr expr2 
+  | Le -> print_expr expr1 ;print_string " <= " ;print_expr expr2 
+  | Gt -> print_expr expr1 ;print_string " > ";print_expr expr2 
+  | Ge -> print_expr expr1 ;print_string " >= " ;print_expr expr2 
+;;
+let print_cond c :unit=
+let (exp,comp,exp2) = c in 
+print_comp comp exp exp2
+;;
 
 let check_empty_block b =
   match b with
@@ -293,17 +342,21 @@ let print_polish (p:program) : unit =
 ;;
 
 
+let read_polish (filename:string) : program = failwith "TODO"
 
 let usage () =
+  (*eval_polish abs;*) (*eval_polish factors;*) (*print_polish abs;*) (*print_polish factors;*)
   print_string "Polish : analyse statique d'un mini-langage\n";
   print_string "usage: à documenter (TODO)\n"
-
+  
   let main () =
     match Sys.argv with
     | [|_;"-reprint";file|] -> print_polish (read_polish file)
     | [|_;"-eval";file|] -> eval_polish (read_polish file)
     | _ ->usage ()
-  
-
+    
+    
     (* lancement de ce main *)
     let () = main ()
+    
+    

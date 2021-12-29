@@ -96,7 +96,8 @@ let factors:program = [
 
 (***********************************************************************)
 (* FONCTIONS DE READ POLISH*)
-(* découpe les fichiers en lignes et les met dans une int * string list. 
+(* découpe les fichiers en lignes et les met dans une int * string list. *)
+(*
 let rec add_lines input (no:int) lines  =
 try
   add_lines(input)(no+1) (List.cons (no,(input_line input))lines)
@@ -190,10 +191,11 @@ match  cutline with
 |s::d'->failwith "vide";
 |[]->failwith "vide";
 ;;
+
 (*les fonctions de read marchent jusqu'ici*)
 
 
-(*
+
 
 
 
@@ -227,66 +229,7 @@ let rec parse_instr lines (no:int) =
 ;;    
 *)
 (* FONCTIONS DE EVAL POLISH*)
-let var_table = Hashtbl.create 123456;;
-let eval_read n =
-  print_string "assigner la variable ";
-  print_string n;
-  print_newline();
-  let input:int = read_int() in
-  Hashtbl.add var_table n input
-;;
 
-let rec eval_expr exp =
-  match exp with
-  |Num(n) -> n
-  |Var(s)->Hashtbl.find var_table s
-  |Op(op,exp,exp2)->eval_op op exp exp2
-  and
-  eval_op op exp exp2 :position=
-  match op with
-  |Add -> eval_expr exp + eval_expr exp2
-  |Sub -> eval_expr exp - eval_expr exp2
-  |Mul -> eval_expr exp * eval_expr exp2
-  |Div -> eval_expr exp / eval_expr exp2
-  |Mod -> eval_expr exp  mod eval_expr exp2
-;;
-
-let eval_print e =
-  print_int (eval_expr e);
-  print_newline ();
-;;
-
-let eval_comp comp expr1 expr2 =
-  match comp with
-  | Eq -> eval_expr expr1 = eval_expr expr2
-  | Ne -> eval_expr expr1 <> eval_expr expr2
-  | Lt -> eval_expr expr1 < eval_expr expr2
-  | Le -> eval_expr expr1 <= eval_expr expr2
-  | Gt -> eval_expr expr1 > eval_expr expr2
-  | Ge -> eval_expr expr1 >= eval_expr expr2
-;;
-
-let eval_cond c =
-  let (exp,comp,exp2) = c in
-  (eval_comp comp exp exp2)
-;;
-
-let eval_set i s :unit =
-  Hashtbl.add var_table s i
-;;
-
-let eval_polish (p:program) : unit =
-  let rec eval_block p =
-    match p with
-    |[]->();
-    |a::y -> match a with
-    |x,Set (n,e)->eval_set (eval_expr e) n ; eval_block y ;
-    |(x,Read(n))->eval_read n  ; eval_block y;
-    |x,If(c,bl,bl2)-> if eval_cond c then eval_block bl else eval_block bl2 ; eval_block y ;
-    |x,Print(e)-> eval_print e ; eval_block y;
-    |x,While(c,b)->if eval_cond c then ( eval_block b ; eval_block p) else eval_block y ;
-  in eval_block p
-;;
 
 
 
@@ -351,7 +294,7 @@ let usage () =
   let main () =
     match Sys.argv with
     | [|_;"-reprint";file|] -> print_polish (read_polish file)
-    | [|_;"-eval";file|] -> eval_polish (read_polish file)
+    | [|_;"-eval";file|] -> Eval.eval_polish (Eval.abs)
     | _ ->usage ()
     
     

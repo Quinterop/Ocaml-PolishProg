@@ -230,12 +230,11 @@ let read_polish (filename:string) : program = failwith "TODO"
 
 let usage () =
   (*eval_polish abs;*) (*eval_polish factors;*) (*print_polish abs;*) (*print_polish factors;*)
-  print_string "Polish : analyse statique d'un mini-langage\n";
-  print_string "usage: à documenter (TODO)\n"
+  Reprint.print_polish (Reprint.abs)
   
   let main () =
     match Sys.argv with
-    | [|_;"-reprint";file|] -> Print.print_polish (Print.abs)
+    | [|_;"-reprint";file|] -> Reprint.print_polish (Reprint.abs)
     | [|_;"-eval";file|] -> Eval.eval_polish (Eval.abs)
     | _ ->usage ()
     

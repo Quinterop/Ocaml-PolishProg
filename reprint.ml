@@ -1,4 +1,5 @@
-type position = int
+type position = int ;;
+
 (** Nom de variable *)
 type name = string
 

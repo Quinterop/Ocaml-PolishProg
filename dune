@@ -1,5 +1,5 @@
 (executable
  (name polish)
-  (libraries eval)
-(flags (:standard -warn-error -A))
+  (modules polish reprint eval)
+  (flags :standard -warn-error -A \ -short -path)
 )

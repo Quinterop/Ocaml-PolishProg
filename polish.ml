@@ -1,100 +1,8 @@
-(** Projet Polish -- Analyse statique d'un mini-langage impératif *)
-(** Note : cet embryon de projet est pour l'instant en un seul fichier
-polish.ml. Il est recommandé d'architecturer ultérieurement votre
-projet en plusieurs fichiers source de tailles raisonnables *)
-
-(*****************************************************************************)
-(** Syntaxe abstraite Polish (types imposés, ne pas changer sauf extensions) *)
-
-(** Position : numéro de ligne dans le fichier, débutant à 1 *)
-type position = int
-
-(** Nom de variable *)
-type name = string
-
-(** Opérateurs arithmétiques : + - * / % *)
-type op = Add | Sub | Mul | Div | Mod
-
-(** Expressions arithmétiques *)
-type expr =
-| Num of int
-| Var of name
-| Op of op * expr * expr
-
-(** Opérateurs de comparaisons *)
-type comp =
-| Eq (* = *)
-| Ne (* Not equal, <> *)
-| Lt (* Less than, < *)
-| Le (* Less or equal, <= *)
-| Gt (* Greater than, > *)
-| Ge (* Greater or equal, >= *)
-
-(** Condition : comparaison entre deux expressions *)
-type cond = expr * comp * expr
-
-(** Instructions *)
-type instr =
-| Set of name * expr
-| Read of name
-| Print of expr
-| If of cond * block * block
-| While of cond * block
-and block = (position * instr) list
-
-(** Un programme Polish est un bloc d'instructions *)
-
-type program = block
-let read_polish (filename:string) : program = failwith "TODO"
-(*
-let abs:program = [
-(1, Read("n"));
-(2, If(
-(Var("n"), Lt, Num(0)),
-[
-(1, Set("res", Op(Sub, Num(0), Var("n"))));
-],
-[
-(1, Set("res", Var("n")));
-]
-));
-(3, Print(Var("res")));
-]
 
 
-let factors:program = [
-(1, Read("n"));
-(2, If(
-(Var("n"), Le, Num(0)),
-[
-(1, Print(Num(-1)));
-],
-[
-(1, Set("i", Num(2)));
-(2, While(
-(Op(Mul, Var("i"), Var("i")), Le, Var("n")),
-[
-(1, If(
-(Op(Mod, Var("n"), Var("i")), Eq, Num(0)),
-[
-(1, Print(Var("i")));
-(2, Set("n", Op(Div, Var("n"), Var("i"))));
-],
-[
-(1, Set("i", Op(Add, Var("i"), Num(1))));
-]
-));
-]
-));
-(3, Print(Var("n")));
-]
-));
-]
-
-*)
 (***********************************************************************)
 (* FONCTIONS DE READ POLISH*)
-(*découpe les fichiers en lignes et les met dans une int * string list. 
+(*découpe les fichiers en lignes et les met dans une int * string list. *)
 let rec add_lines input (no:int) lines  =
 try
   add_lines(input)(no+1) (List.cons (no,(input_line input))lines)
@@ -127,7 +35,7 @@ let get_line lines no =
   List.assoc no lines 
 ;;
 (*
-let read_polish (filename:string) : program = 
+let read_polish (filename:string) : Type.program = 
   let file = line_parser filename in 
   match file with 
   |(x,y) :: l'-> match (word_cutter y) with
@@ -141,53 +49,89 @@ let read_polish (filename:string) : program =
   
 ;;
 *)
-let fetch_expr line :expr= 
-  match line with
-  |[]->failwith "vide"
-;;
-let fetch_comp str acc=
-  match str with
-  |"="->Eq
-  |"<"->Lt
-  |"<="->Le
-  |">"->Gt
-  |">="->Ge
-  |"<>"->Ne
-  |e->failwith "mauvais arg"
-;;
-
-let rec fetch_cond  acc line :cond= 
+let fetch_op line acc :Type.op= 
 match line with
-|"="::l'->(fetch_expr acc, Eq,fetch_expr l')
-|"<"::l'->(fetch_expr acc, Lt,fetch_expr l')
-|"<="::l'->(fetch_expr acc, Le,fetch_expr l')
-|">"::l'->(fetch_expr acc, Gt,fetch_expr l')
-|">="::l'->(fetch_expr acc, Ge,fetch_expr l')
-|"<>"::l'->(fetch_expr acc,Ne ,fetch_expr l')
+|"+"::l'->(fetch_expr acc, Type.Add,fetch_expr l')
+|"-"::l'->(fetch_expr acc, Type.Sub,fetch_expr l')
+|"*"::l'->(fetch_expr acc, Type.Mul,fetch_expr l')
+|"/"::l'->(fetch_expr acc, Type.Div,fetch_expr l')
+|"%"::l'->(fetch_expr acc, Type.Mod,fetch_expr l')
 |s::l'->fetch_cond  (acc@[s]) l';
-
+|[]-> failwith "vide";
 ;;
 
-let parse_if lines = 
+let fetch_num = ;;
 
-let rec parse_instr lines (no:int) (no2:int)=
-(*let curline =List.assoc no lines in ?*)
-let line = List.assoc no lines in
+let fetch_int =;;
+
+let fetch_expr line =
+match line with
+| ;;
+
+let fetch_comp str acc=
+match str with
+|"="->Type.Eq
+|"<"->Type.Lt
+|"<="->Type.Le
+|">"->Type.Gt
+|">="->Type.Ge
+|"<>"->Type.Ne
+|e->failwith "mauvais arg"
+;;
+
+let rec fetch_cond  acc line :Type.cond= 
+match line with
+|"="::l'->(fetch_expr acc, Type.Eq,fetch_expr l')
+|"<"::l'->(fetch_expr acc, Type.Lt,fetch_expr l')
+|"<="::l'->(fetch_expr acc, Type.Le,fetch_expr l')
+|">"::l'->(fetch_expr acc, Type.Gt,fetch_expr l')
+|">="::l'->(fetch_expr acc, Type.Ge,fetch_expr l')
+|"<>"::l'->(fetch_expr acc,Type.Ne ,fetch_expr l')
+|s::l'->fetch_cond  (acc@[s]) l';
+|[]-> failwith "vide";
+;;
+
+let parse_if lines =()
+
+
+
+let rec parse_block lines no ind :Type.program=
+
+let rec parse_instr (no:int) (no2:int) :Type.block=
+
+let line = try List.assoc no lines with Not_found -> "finduficher"; in
+if line <> "findufichier" then (
 let indent = indentation line in
+if indent >= ind then (
 let cutline = word_cutter line in
-match  cutline with 
-|"READ" :: s ::d -> (no2,Read s)::(parse_instr lines (no+1))
+match cutline with 
+|"READ" :: s ::d' -> (no2,Read s)::(parse_instr (no+1)(no2+1))
 |"READ" ::[]-> failwith "vide"
-|"PRINT" :: d' ->(no2, Print (fetch_expr d'))::(parse_instr lines (no+1) (no2+1))
-|"IF" :: d' -> (no2,If((fetch_cond [] d'),parse_instr lines (no+1) (no2+1),parse_instr lines (no+1) (no2+1)))::parse_instr lines (no+1) (no2+1) (*CASSE*)
-|"WHILE" :: d' -> parse_while d'
-|"COMMENT" ::d'-> try
-   let test = List.assoc (no+1) lines in 
-   (parse_instr lines (no+1) no2) with Not_found ->[];
-|s :: d :: l'->no2,Set (d(fetch_expr l'))
-|s::d'->failwith "vide";
-|[]->failwith "vide";
+
+|"PRINT" :: d' ->(no2, Print (fetch_expr d'))::(parse_instr (no+1) (no2+1))
+
+|"IF" :: d' ->
+let cond = fetch_cond [] d' in
+let block1 =  parse_block lines (no+1) (ind+2) in 
+let block2 =  parse_block lines (no+1) (ind+2) in 
+(no2,(If (cond, block1, block2))) :: parse_instr (no+1) (no2+1);
+
+|"WHILE" :: d' ->let condition = fetch_cond [] d' in 
+  let block = parse_block lines no (ind+2) in
+  (no2,While (condition, block)) :: parse_instr (no+1) (no2+1);
+|[]->failwith "vide"; 
+
+|"COMMENT" ::d'-> let check_comment no1 no2 line = try (let test = List.assoc (no+1) lines in (parse_instr (no+1) no2)) with Not_found
+ -> [] in check_comment no no2 lines;
+
+|s :: d' -> (no2,Set (s,fetch_expr d'))::(parse_instr (no+1)(no2+1));
+)
+else [];
+) else [];
+in parse_instr no 0;
+
 ;;
+
 (*les fonctions de read marchent jusqu'ici*)
 
 
@@ -224,22 +168,25 @@ let rec parse_instr lines (no:int) =
   |[]->failwith "vide";
 ;;    
 *)
-*)
 
-let read_polish (filename:string) : program = failwith "TODO"
+
+let read_polish (filename:string) : Type.program = 
+    parse_block (line_parser filename) 0 0 ;;
 
 let usage () =
   (*eval_polish abs;*) (*eval_polish factors;*) (*print_polish abs;*) (*print_polish factors;*)
-  Reprint.print_polish (Reprint.abs)
+ 
+  Reprint.print_polish(read_polish "exemples/abs.p");;
   
   let main () =
     match Sys.argv with
-    | [|_;"-reprint";file|] -> Reprint.print_polish (Reprint.abs)
-    | [|_;"-eval";file|] -> Eval.eval_polish (Eval.abs)
+    (*| [|_;"-reprint";file|] -> Reprint.print_polish (Type.abs)
+    | [|_;"-eval";file|] -> Eval.eval_polish (Type.abs)*)
     | _ ->usage ()
-    
-    
+  
+    ;;
     (* lancement de ce main *)
-    let () = main ()
+    let () = main ();;
+    
     
     

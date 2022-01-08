@@ -16,6 +16,7 @@ let line_parser filename =
     List.rev (add_lines ic 1 lines )
   with e ->failwith "fichier non ouvrable"
 ;;
+
 let word_cutter (line:string) :string list =  
   String.split_on_char ' ' line
 ;;
@@ -31,6 +32,7 @@ let rec indent_aux t n =
   |c::t'-> if c =' ' then indent_aux (t') (n+1) else n in 
   indent_aux t 0
 ;;
+
 let get_line lines no = 
   List.assoc no lines 
 ;;
@@ -49,34 +51,25 @@ let read_polish (filename:string) : Type.program =
   
 ;;
 *)
-let fetch_op line acc :Type.op= 
-match line with
-|"+"::l'->(fetch_expr acc, Type.Add,fetch_expr l')
-|"-"::l'->(fetch_expr acc, Type.Sub,fetch_expr l')
-|"*"::l'->(fetch_expr acc, Type.Mul,fetch_expr l')
-|"/"::l'->(fetch_expr acc, Type.Div,fetch_expr l')
-|"%"::l'->(fetch_expr acc, Type.Mod,fetch_expr l')
-|s::l'->fetch_cond  (acc@[s]) l';
-|[]-> failwith "vide";
+
+let fetch_int str :(int option)=
+try Some (Stdlib.int_of_string str) with e -> None
+
+let fetch_xp str =
+  match fetch_int str with
+  |Some x -> Type.Num x
+  |None -> Type.Var str 
 ;;
 
-let fetch_num = ;;
-
-let fetch_int =;;
-
-let fetch_expr line =
+let rec fetch_expr line :Type.expr= 
 match line with
-| ;;
-
-let fetch_comp str acc=
-match str with
-|"="->Type.Eq
-|"<"->Type.Lt
-|"<="->Type.Le
-|">"->Type.Gt
-|">="->Type.Ge
-|"<>"->Type.Ne
-|e->failwith "mauvais arg"
+|"+"::d::l'->Op (Add,fetch_xp d, (fetch_expr l'));
+|"-"::d::l'->Op (Sub,fetch_xp d, (fetch_expr l'));
+|"*"::d::l'->Op (Mul,fetch_xp d, (fetch_expr l'));
+|"/"::d::l'->Op (Div,fetch_xp d, (fetch_expr l'));
+|"%"::d::l'->Op (Mod,fetch_xp d, (fetch_expr l'));
+|s::l'-> fetch_xp s;
+|[]-> failwith "vide";
 ;;
 
 let rec fetch_cond  acc line :Type.cond= 
@@ -121,7 +114,8 @@ let block2 =  parse_block lines (no+1) (ind+2) in
   (no2,While (condition, block)) :: parse_instr (no+1) (no2+1);
 |[]->failwith "vide"; 
 
-|"COMMENT" ::d'-> let check_comment no1 no2 line = try (let test = List.assoc (no+1) lines in (parse_instr (no+1) no2)) with Not_found
+|"COMMENT" ::d'-> let check_comment no1 no2 line =
+   try (let test = List.assoc (no+1) lines in (parse_instr (no+1) no2)) with Not_found
  -> [] in check_comment no no2 lines;
 
 |s :: d' -> (no2,Set (s,fetch_expr d'))::(parse_instr (no+1)(no2+1));

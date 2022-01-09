@@ -43,8 +43,6 @@ and block = (position * instr) list
 (** Un programme Polish est un bloc d'instructions *)
 
 type program = block
-let read_polish (filename:string) : program = failwith "TODO"
-
 let abs:program = [
 (1, Read("n"));
 (2, If(

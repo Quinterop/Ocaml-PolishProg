@@ -1,4 +1,4 @@
-COMMENT valeur absolue
+ COMMENT valeur absolue
 READ n
 IF n < 0
   res := - 0 n

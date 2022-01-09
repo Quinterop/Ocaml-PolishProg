@@ -1,4 +1,4 @@
-
+open Printf
 
 (***********************************************************************)
 (* FONCTIONS DE READ POLISH*)
@@ -90,41 +90,42 @@ let parse_if lines =()
 
 let rec parse_block lines no ind :Type.program * int=
 
+if List.length lines <= 0 then [],no else 
 let rec parse_instr (no:int) (no2:int) :Type.block * int=
 
 let line = try List.assoc no lines with Not_found -> "finduficher"; in
 if line <> "findufichier" then (
-let indent = indentation line in
+  let indent = indentation line in
 if indent >= ind then (
-let cutline = word_cutter line in
+  let cutline = word_cutter line in
 match cutline with 
+|[]->failwith "vide";
 |"READ" :: s ::d' -> let block,y = parse_instr (no+1)(no2+1) in  (no2,Read s)::(block),no+1
 |"READ" ::[]-> failwith "vide"
 
 |"PRINT" :: d' -> let block,y = parse_instr (no+1)(no2+1) in (no2, Print (fetch_expr d'))::(block),no+1
 
-|"IF":: d' ->
+|"IF":: d' ->(
 let cond = fetch_cond [] d' in
 let block1,x =  parse_block lines (no+1) (ind+2) in 
 let block2,y =  parse_block lines (x) (ind+2) in 
 let body, z = parse_instr (y)(no2+1) in 
-(no2,(If (cond, block1, block2))) :: body,z;
-|"WHILE" :: d' ->
-  let condition = fetch_cond [] d' in 
-  let block,x = parse_block lines no (ind+2) in
+(no2,(If (cond, block1, block2))) :: body,z;)
+|"WHILE" :: d' ->(
+let condition = fetch_cond [] d' in 
+let block,x = parse_block lines no (ind+2) in
 let body, z = parse_instr (x)(no2+1) in 
-  (no2,While (condition, block)) :: body,z
-|[]->failwith "vide";
+(no2,While (condition, block)) :: body,z;)
 
 |"COMMENT" ::d'-> let check_comment no1 no2 line =
-   try (let test = List.assoc (no+1) lines in (parse_instr (no+1) no2)) with Not_found-> [],no+1
-   in check_comment no no2 lines;
+  try (let test = List.assoc (no+1) lines in (parse_instr (no+1) no2)) with Not_found-> [],no+1
+in check_comment no no2 lines;
 
-|s::d' -> let block,x = parse_instr (no+1)(no2+1) in (no2,Set (s,fetch_expr d'))::(block),no+1;
+|s::d' -> let block,x = parse_instr (no+1)(no2+1) in (no2,Set (s,fetch_expr d'))::(block),no+1; (* probleme est la*)
 )
 else [],no+1;
 ) else [],no+1;
-in parse_instr no 0;
+in parse_instr no 1;
 
 ;;
 
@@ -166,24 +167,19 @@ let rec parse_instr lines (no:int) =
 *)
 
 
-let read_polish (filename:string) : Type.program = 
-let x,y = parse_block (line_parser filename) 0 0 in x
-;;
-
 let usage () =
   (*eval_polish abs;*) (*eval_polish factors;*) (*print_polish abs;*) (*print_polish factors;*)
- 
-  Reprint.print_polish(read_polish "exemples/abs.p");;
+  Eval.eval_polish(read_polish "exemples/fact.p");;
   
   let main () =
     match Sys.argv with
     (*| [|_;"-reprint";file|] -> Reprint.print_polish (Type.abs)
     | [|_;"-eval";file|] -> Eval.eval_polish (Type.abs)*)
     | _ ->usage () 
+    
+  ;;
+  (* lancement de ce main *)
+  let () = main ();;
   
-    ;;
-    (* lancement de ce main *)
-    let () = main ();;
-    
-    
-    
+  
+  

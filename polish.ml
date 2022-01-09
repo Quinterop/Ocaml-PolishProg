@@ -126,9 +126,14 @@ in check_comment no no2 lines;
 else [],no+1;
 ) else [],no+1;
 in parse_instr no 1;
-
 ;;
 
+let read_polish (filename:string) : Type.program =
+  let (program,reste) = parse_block (line_parser filename) 1 0 in
+  match reste with 
+  |0 -> program 
+  |_ -> failwith" erreur"
+;;
 (*les fonctions de read marchent jusqu'ici*)
 
 

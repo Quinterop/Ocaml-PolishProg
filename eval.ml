@@ -98,7 +98,6 @@ let rec vars_expr exp =
   |Type.Op(op,exp,exp2)->vars_expr exp; vars_expr exp2 ;
 ;;
 
-
 let vars_cond c =
   let (exp,comp,exp2) = c in
   vars_expr exp;vars_expr exp2;
@@ -108,35 +107,7 @@ let vars_print e=
 vars_expr e
 ;;
 
-
-
-
 let rec vars_blockwhile p =
-  match p with
-  |[]->();
-  |a::y -> match a with
-  |x,Type.Set (n,e)->vars_expr e;set_varswhile n ; vars_blockwhile y ;
-  |x,Type.Read(n)->set_varswhile n  ; vars_blockwhile y;
-  |x,Type.If(c,bl,bl2)->  vars_cond c; vars_blockwhile y ;
-  |x,Type.Print(e)-> vars_print e ; vars_blockwhile y;
-  |x,Type.While(c,b)-> vars_cond c ;vars_blockwhile b ;vars_blockwhile y ;
-;;
-
-let rec vars_blockif p =
-  match p with
-  |[]->();
-  |a::y -> match a with
-  |x,Type.Set (n,e)->vars_expr e;set_varsif n ; vars_blockif y ;
-  |x,Type.Read(n)->set_varsif n  ; vars_blockif y;
-  |x,Type.If(c,bl,bl2)->  vars_cond c;vars_if bl bl2; vars_blockif y ;
-  |x,Type.Print(e)-> vars_print e ; vars_blockif y;
-  |x,Type.While(c,b)-> vars_cond c ;vars_blockif b ;vars_blockif y ;
-and vars_if bl bl2 = 
-  vars_blockif bl ;
-  vars_blockelse bl2;
-  intersect_tbl defvarsif defvarselse allvars;
-  Hashtbl.clear defvarsif;     Hashtbl.clear defvarselse;
-and  vars_blockelse p =
   match p with
   |[]->();
   |a::y -> match a with
@@ -145,6 +116,29 @@ and  vars_blockelse p =
   |x,Type.If(c,bl,bl2)->  vars_cond c;vars_if bl bl2; vars_blockwhile y ;
   |x,Type.Print(e)-> vars_print e ; vars_blockwhile y;
   |x,Type.While(c,b)-> vars_cond c ;vars_blockwhile b ;vars_blockwhile y ;
+and vars_blockif p =
+  match p with
+  |[]->();
+  |a::y -> match a with
+  |x,Type.Set (n,e)->vars_expr e;set_varsif n ; vars_blockif y ;
+  |x,Type.Read(n)->set_varsif n  ; vars_blockif y;
+  |x,Type.If(c,bl,bl2)->  vars_cond c;vars_if bl bl2; vars_blockif y ;
+  |x,Type.Print(e)-> vars_print e ; vars_blockif y;
+  |x,Type.While(c,b)-> vars_cond c ;vars_blockwhile b ;vars_blockif y ;
+and vars_if bl bl2 = 
+  vars_blockif bl ;
+  vars_blockelse bl2;
+  intersect_tbl defvarsif defvarselse defvars;
+  Hashtbl.clear defvarsif;     Hashtbl.clear defvarselse;
+and vars_blockelse p =
+  match p with
+  |[]->();
+  |a::y -> match a with
+  |x,Type.Set (n,e)->vars_expr e;set_varselse n ; vars_blockelse y ;
+  |x,Type.Read(n)->set_varselse n  ; vars_blockelse y;
+  |x,Type.If(c,bl,bl2)-> vars_cond c;vars_if bl bl2; vars_blockelse y ;
+  |x,Type.Print(e)-> vars_print e ; vars_blockelse y;
+  |x,Type.While(c,b)-> vars_cond c ;vars_blockwhile b ;vars_blockelse y ;
 ;;
 
 let rec loop list =
@@ -190,7 +184,7 @@ let rec vars_polish p =
   
   print_string "ttes variables : ";
   print_tbl allvars;
-  let unvars = Hashtbl.create 1234 in 
+  let setvars = Hashtbl.create 1234 in 
   difference_tbl allvars defvars unvars;
   print_string "variables non def :";
   print_tbl unvars;

@@ -174,7 +174,7 @@ let rec parse_instr lines (no:int) =
 
 let usage () =
   (*eval_polish abs;*) (*eval_polish factors;*) (*print_polish abs;*) (*print_polish factors;*)
-  Eval.vars_polish(Type.abs);;
+  Eval.vars_polish(Type.factors);;
   
   let main () =
     match Sys.argv with

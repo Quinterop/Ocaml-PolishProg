@@ -121,8 +121,8 @@ and vars_blockif p =
   |[]->();
   |a::y -> match a with
   |x,Type.Set (n,e)->vars_expr e;set_varsif n ; vars_blockif y ;
-  |x,Type.Read(n)->set_varsif n  ; vars_blockif y;
-  |x,Type.If(c,bl,bl2)->  vars_cond c;vars_if bl bl2; vars_blockif y ;
+  |x,Type.Read(n)->set_varsif n ; vars_blockif y;
+  |x,Type.If(c,bl,bl2)->vars_cond c;vars_if bl bl2; vars_blockif y ;
   |x,Type.Print(e)-> vars_print e ; vars_blockif y;
   |x,Type.While(c,b)-> vars_cond c ;vars_blockwhile b ;vars_blockif y ;
 and vars_if bl bl2 = 
@@ -184,7 +184,7 @@ let rec vars_polish p =
   
   print_string "ttes variables : ";
   print_tbl allvars;
-  let setvars = Hashtbl.create 1234 in 
+  let unvars = Hashtbl.create 1234 in 
   difference_tbl allvars defvars unvars;
   print_string "variables non def :";
   print_tbl unvars;

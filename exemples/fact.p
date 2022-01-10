@@ -10,3 +10,8 @@ WHILE i <= n
   i := + i 1
 PRINT r
 read g 
+if 1 
+  a = 1
+  print a 
+else 
+  print n

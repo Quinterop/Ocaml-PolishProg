@@ -71,30 +71,30 @@ let defvarsif = Hashtbl.create 1234;;
 let defvarselse = Hashtbl.create 1234;;
 
 let set_vars s :unit =
-  Hashtbl.add allvars s 0;
-  Hashtbl.add defvars s 0;
+  Hashtbl.replace allvars s 0;
+  Hashtbl.replace defvars s 0;
 ;;
 let set_varswhile s :unit =
-  Hashtbl.add allvars s 0;
+  Hashtbl.replace allvars s 0;
 ;;
 let set_varsif s :unit =
-  Hashtbl.add allvars s 0;
-  Hashtbl.add defvarsif s 0;
+  Hashtbl.replace allvars s 0;
+  Hashtbl.replace defvarsif s 0;
   
 ;;
 let set_varselse s :unit =
-  Hashtbl.add allvars s 0;
-  Hashtbl.add defvarselse s 0;
+  Hashtbl.replace allvars s 0;
+  Hashtbl.replace defvarselse s 0;
 ;;
 
 let intersect_tbl tb1 tb2 tbres =
-Hashtbl.iter (fun a b ->if Hashtbl.find_opt tb2 a <> None then (Hashtbl.add tbres a 0)) tb1
+Hashtbl.iter (fun a b ->if Hashtbl.find_opt tb2 a <> None then (Hashtbl.replace tbres a 0)) tb1
 ;;
 
 let rec vars_expr exp =
   match exp with
   |Type.Num(n) -> ()
-  |Type.Var(s)->if Hashtbl.find_opt allvars s = None then Hashtbl.add allvars s 0;
+  |Type.Var(s)->if Hashtbl.find_opt allvars s = None then Hashtbl.replace allvars s 0;
   |Type.Op(op,exp,exp2)->vars_expr exp; vars_expr exp2 ;
 ;;
 
@@ -143,7 +143,7 @@ and vars_blockelse p =
 
 let rec loop list =
   match list with 
-  |a::d'-> Hashtbl.add defvars a 0 ;loop d';
+  |a::d'-> Hashtbl.replace defvars a 0 ;loop d';
   |[]->();
 ;;
 
@@ -159,7 +159,7 @@ let merge tab1 tab2 =
 ;;
 
 let difference_tbl tbl1 tbl2 difftb=
-Hashtbl.iter (fun a b ->if Hashtbl.find_opt tbl2 a = None then (Hashtbl.add difftb a 0)) tbl1
+Hashtbl.iter (fun a b ->if Hashtbl.find_opt tbl2 a = None then (Hashtbl.replace difftb a 0)) tbl1
 ;;
 
 
@@ -170,7 +170,7 @@ print_newline();
 
 
 let rec vars_polish p = 
-  (* let x = Hashtbl.add "abc" allvars in ()*)
+  (* let x = Hashtbl.replace "abc" allvars in ()*)
   let rec vars_block p =
     match p with
     |[]->();
@@ -196,5 +196,5 @@ let rec vars_polish p =
 (*let rec union tab1 tab2 x =
   match tab2 with 
   |"" -> union tab1 tab2 x+1;
-  |(a,b) -> if Hashtbl.find tab1 x = a then  Hashtabl.add defvars else union tab1 tab2 x+1;
+  |(a,b) -> if Hashtbl.find tab1 x = a then  Hashtabl.replace defvars else union tab1 tab2 x+1;
   *)

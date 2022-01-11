@@ -1,86 +1,6 @@
-type position = int ;;
-(** Nom de variable *)
-type name = string
-
-(** Opérateurs arithmétiques : + - * / % *)
-type op = Add | Sub | Mul | Div | Mod
-
-(** Expressions arithmétiques *)
-type expr =
-| Num of int
-| Var of name
-| Op of op * expr * expr
-
-(** Opérateurs de comparaisons *)
-type comp =
-| Eq (* = *)
-| Ne (* Not equal, <> *)
-| Lt (* Less than, < *)
-| Le (* Less or equal, <= *)
-| Gt (* Greater than, > *)
-| Ge (* Greater or equal, >= *)
-
-(** Condition : comparaison entre deux expressions *)
-type cond = expr * comp * expr
-
-(** Instructions *)
-type instr =
-| Set of name * expr
-| Read of name
-| Print of expr
-| If of cond * block * block
-| While of cond * block
-and block = (position * instr) list
-
-(** Un programme Polish est un bloc d'instructions *)
-
-type program = block
-
-let abs:program = [
-(1, Read("n"));
-(2, If(
-(Var("n"), Lt, Num(0)),
-[
-(1, Set("res", Op(Sub, Num(0), Var("n"))));
-],
-[
-(1, Set("res", Var("n")));
-]
-));
-(3, Print(Var("res")));
-]
-
-
-let factors:program = [
-(1, Read("n"));
-(2, If(
-(Var("n"), Le, Num(0)),
-[
-(1, Print(Num(-1)));
-],
-[
-(1, Set("i", Num(2)));
-(2, While(
-(Op(Mul, Var("i"), Var("i")), Le, Var("n")),
-[
-(1, If(
-(Op(Mod, Var("n"), Var("i")), Eq, Num(0)),
-[
-(1, Print(Var("i")));
-(2, Set("n", Op(Div, Var("n"), Var("i"))));
-],
-[
-(1, Set("i", Op(Add, Var("i"), Num(1))));
-]
-));
-]
-));
-(3, Print(Var("n")));
-]
-));
-]
 
 let var_table = Hashtbl.create 123456;;
+
 let eval_read n =
   print_string "assigner la variable ";
   print_string n;
@@ -91,17 +11,17 @@ let eval_read n =
 
 let rec eval_expr exp =
   match exp with
-  |Num(n) -> n
-  |Var(s)->Hashtbl.find var_table s
-  |Op(op,exp,exp2)->eval_op op exp exp2
+  |Type.Num(n) -> n
+  |Type.Var(s)->Hashtbl.find var_table s
+  |Type.Op(op,exp,exp2)->eval_op op exp exp2
   and
-  eval_op op exp exp2 :position=
+  eval_op op exp exp2 :Type.position=
   match op with
-  |Add -> eval_expr exp + eval_expr exp2
-  |Sub -> eval_expr exp - eval_expr exp2
-  |Mul -> eval_expr exp * eval_expr exp2
-  |Div -> eval_expr exp / eval_expr exp2
-  |Mod -> eval_expr exp  mod eval_expr exp2
+  |Type.Add -> eval_expr exp + eval_expr exp2
+  |Type.Sub -> eval_expr exp - eval_expr exp2
+  |Type.Mul -> eval_expr exp * eval_expr exp2
+  |Type.Div -> eval_expr exp / eval_expr exp2
+  |Type.Mod -> eval_expr exp  mod eval_expr exp2
 ;;
 
 let eval_print e =
@@ -111,12 +31,12 @@ let eval_print e =
 
 let eval_comp comp expr1 expr2 =
   match comp with
-  | Eq -> eval_expr expr1 = eval_expr expr2
-  | Ne -> eval_expr expr1 <> eval_expr expr2
-  | Lt -> eval_expr expr1 < eval_expr expr2
-  | Le -> eval_expr expr1 <= eval_expr expr2
-  | Gt -> eval_expr expr1 > eval_expr expr2
-  | Ge -> eval_expr expr1 >= eval_expr expr2
+  | Type.Eq -> eval_expr expr1 = eval_expr expr2
+  | Type.Ne -> eval_expr expr1 <> eval_expr expr2
+  | Type.Lt -> eval_expr expr1 < eval_expr expr2
+  | Type.Le -> eval_expr expr1 <= eval_expr expr2
+  | Type.Gt -> eval_expr expr1 > eval_expr expr2
+  | Type.Ge -> eval_expr expr1 >= eval_expr expr2
 ;;
 
 let eval_cond c =
@@ -128,15 +48,153 @@ let eval_set i s :unit =
   Hashtbl.add var_table s i
 ;;
 
-let eval_polish (p:program) : unit =
+let eval_polish (p:Type.program) : unit =
   let rec eval_block p =
     match p with
     |[]->();
     |a::y -> match a with
-    |x,Set (n,e)->eval_set (eval_expr e) n ; eval_block y ; print_int x;
-    |x,Read(n)->eval_read n  ; eval_block y; print_int x;
-    |x,If(c,bl,bl2)-> if eval_cond c then eval_block bl else eval_block bl2 ; eval_block y ; print_int x;
-    |x,Print(e)-> eval_print e ; eval_block y; print_int x;
-    |x,While(c,b)->if eval_cond c then ( eval_block b ; eval_block p) else eval_block y ; print_int x;
+    |x,Type.Set (n,e)->eval_set (eval_expr e) n ; eval_block y ; print_int x;
+    |x,Type.Read(n)->eval_read n  ; eval_block y; print_int x;
+    |x,Type.If(c,bl,bl2)-> if eval_cond c then eval_block bl else eval_block bl2 ; eval_block y ; print_int x;
+    |x,Type.Print(e)-> eval_print e ; eval_block y; print_int x;
+    |x,Type.While(c,b)->if eval_cond c then ( eval_block b ; eval_block p) else eval_block y ; print_int x;
   in eval_block p
 ;;
+
+
+
+
+(*FONCTIONS DE VARS POLISH*)
+let allvars = Hashtbl.create 1234;;
+let defvars = Hashtbl.create 1234;;
+let defvarsif = Hashtbl.create 1234;;
+let defvarselse = Hashtbl.create 1234;;
+
+let set_vars s :unit =
+  Hashtbl.replace allvars s 0;
+  Hashtbl.replace defvars s 0;
+;;
+let set_varswhile s :unit =
+  Hashtbl.replace allvars s 0;
+;;
+let set_varsif s :unit =
+  Hashtbl.replace allvars s 0;
+  Hashtbl.replace defvarsif s 0;
+  
+;;
+let set_varselse s :unit =
+  Hashtbl.replace allvars s 0;
+  Hashtbl.replace defvarselse s 0;
+;;
+
+let intersect_tbl tb1 tb2 tbres =
+Hashtbl.iter (fun a b ->if Hashtbl.find_opt tb2 a <> None then (Hashtbl.replace tbres a 0)) tb1
+;;
+
+let rec vars_expr exp =
+  match exp with
+  |Type.Num(n) -> ()
+  |Type.Var(s)->if Hashtbl.find_opt allvars s = None then Hashtbl.replace allvars s 0;
+  |Type.Op(op,exp,exp2)->vars_expr exp; vars_expr exp2 ;
+;;
+
+let vars_cond c =
+  let (exp,comp,exp2) = c in
+  vars_expr exp;vars_expr exp2;
+;;
+
+let vars_print e=
+vars_expr e
+;;
+
+let rec vars_blockwhile p =
+  match p with
+  |[]->();
+  |a::y -> match a with
+  |x,Type.Set (n,e)->vars_expr e;set_varswhile n ; vars_blockwhile y ;
+  |x,Type.Read(n)->set_varswhile n  ; vars_blockwhile y;
+  |x,Type.If(c,bl,bl2)->  vars_cond c;vars_if bl bl2; vars_blockwhile y ;
+  |x,Type.Print(e)-> vars_print e ; vars_blockwhile y;
+  |x,Type.While(c,b)-> vars_cond c ;vars_blockwhile b ;vars_blockwhile y ;
+and vars_blockif p =
+  match p with
+  |[]->();
+  |a::y -> match a with
+  |x,Type.Set (n,e)->vars_expr e;set_varsif n ; vars_blockif y ;
+  |x,Type.Read(n)->set_varsif n ; vars_blockif y;
+  |x,Type.If(c,bl,bl2)->vars_cond c;vars_if bl bl2; vars_blockif y ;
+  |x,Type.Print(e)-> vars_print e ; vars_blockif y;
+  |x,Type.While(c,b)-> vars_cond c ;vars_blockwhile b ;vars_blockif y ;
+and vars_if bl bl2 = 
+  vars_blockif bl ;
+  vars_blockelse bl2;
+  intersect_tbl defvarsif defvarselse defvars;
+  Hashtbl.clear defvarsif;     Hashtbl.clear defvarselse;
+and vars_blockelse p =
+  match p with
+  |[]->();
+  |a::y -> match a with
+  |x,Type.Set (n,e)->vars_expr e;set_varselse n ; vars_blockelse y ;
+  |x,Type.Read(n)->set_varselse n  ; vars_blockelse y;
+  |x,Type.If(c,bl,bl2)-> vars_cond c;vars_if bl bl2; vars_blockelse y ;
+  |x,Type.Print(e)-> vars_print e ; vars_blockelse y;
+  |x,Type.While(c,b)-> vars_cond c ;vars_blockwhile b ;vars_blockelse y ;
+;;
+
+let rec loop list =
+  match list with 
+  |a::d'-> Hashtbl.replace defvars a 0 ;loop d';
+  |[]->();
+;;
+
+let rec looprint list =
+  match list with 
+  |a::d'-> print_string a; looprint d';
+  |[]->print_newline();
+;;
+
+let merge tab1 tab2 =
+  Hashtbl.fold (fun key elt () -> Hashtbl.replace tab1 key elt) tab2 ();
+  tab1
+;;
+
+let difference_tbl tbl1 tbl2 difftb=
+Hashtbl.iter (fun a b ->if Hashtbl.find_opt tbl2 a = None then (Hashtbl.replace difftb a 0)) tbl1
+;;
+
+
+let print_tbl tab= 
+Hashtbl.iter (fun a b -> print_string (a^" ")) tab;
+print_newline();
+;;
+
+
+let rec vars_polish p = 
+  (* let x = Hashtbl.replace "abc" allvars in ()*)
+  let rec vars_block p =
+    match p with
+    |[]->();
+    |a::y -> match a with
+    |x,Type.Set (n,e)->vars_expr e;set_vars n ; vars_block y 
+    |x,Type.Read(n)->set_vars n  ; vars_block y 
+    |x,Type.Print(e)-> vars_print e ; vars_block y ;
+    |x,Type.If(c,bl,bl2)-> vars_cond c; let r = vars_if bl bl2 in () ; vars_block y ;
+    |x,Type.While(c,b)-> vars_cond c ;vars_blockwhile b ; vars_block y ;
+  in vars_block p;
+  
+  print_string "ttes variables : ";
+  print_tbl allvars;
+  let unvars = Hashtbl.create 1234 in 
+  difference_tbl allvars defvars unvars;
+  print_string "variables non def :";
+  print_tbl unvars;
+  print_string "defvars  :";
+  print_tbl defvars;
+  (* if Vars.is_empty allvars then print_string "empty";*)
+  ;;
+
+(*let rec union tab1 tab2 x =
+  match tab2 with 
+  |"" -> union tab1 tab2 x+1;
+  |(a,b) -> if Hashtbl.find tab1 x = a then  Hashtabl.replace defvars else union tab1 tab2 x+1;
+  *)

@@ -1,5 +1,5 @@
 
-let var_table = Hashtbl.create 123456;;
+let var_table = Hashtbl.create 1234;;(*todo : gerer dynamiquement les tailles des tables.*)
 
 let eval_read n =
   print_string "assigner la variable ";
@@ -62,8 +62,6 @@ let eval_polish (p:Type.program) : unit =
 ;;
 
 
-
-
 (*FONCTIONS DE VARS POLISH*)
 let allvars = Hashtbl.create 1234;;
 let defvars = Hashtbl.create 1234;;
@@ -74,14 +72,16 @@ let set_vars s :unit =
   Hashtbl.replace allvars s 0;
   Hashtbl.replace defvars s 0;
 ;;
+
 let set_varswhile s :unit =
   Hashtbl.replace allvars s 0;
 ;;
+
 let set_varsif s :unit =
   Hashtbl.replace allvars s 0;
   Hashtbl.replace defvarsif s 0;
-  
 ;;
+
 let set_varselse s :unit =
   Hashtbl.replace allvars s 0;
   Hashtbl.replace defvarselse s 0;
@@ -107,7 +107,7 @@ let vars_print e=
 vars_expr e
 ;;
 
-let rec vars_blockwhile p =
+let rec vars_blockwhile p = (*le traitement des blocks if else et while est différent car il faut assigner leurs variables différemment.*)
   match p with
   |[]->();
   |a::y -> match a with
@@ -141,33 +141,14 @@ and vars_blockelse p =
   |x,Type.While(c,b)-> vars_cond c ;vars_blockwhile b ;vars_blockelse y ;
 ;;
 
-let rec loop list =
-  match list with 
-  |a::d'-> Hashtbl.replace defvars a 0 ;loop d';
-  |[]->();
-;;
-
-let rec looprint list =
-  match list with 
-  |a::d'-> print_string a; looprint d';
-  |[]->print_newline();
-;;
-
-let merge tab1 tab2 =
-  Hashtbl.fold (fun key elt () -> Hashtbl.replace tab1 key elt) tab2 ();
-  tab1
-;;
-
 let difference_tbl tbl1 tbl2 difftb=
 Hashtbl.iter (fun a b ->if Hashtbl.find_opt tbl2 a = None then (Hashtbl.replace difftb a 0)) tbl1
 ;;
-
 
 let print_tbl tab= 
 Hashtbl.iter (fun a b -> print_string (a^" ")) tab;
 print_newline();
 ;;
-
 
 let rec vars_polish p = 
   (* let x = Hashtbl.replace "abc" allvars in ()*)
@@ -182,19 +163,12 @@ let rec vars_polish p =
     |x,Type.While(c,b)-> vars_cond c ;vars_blockwhile b ; vars_block y ;
   in vars_block p;
   
-  print_string "ttes variables : ";
+  print_string "toutes variables : ";
   print_tbl allvars;
   let unvars = Hashtbl.create 1234 in 
   difference_tbl allvars defvars unvars;
   print_string "variables non def :";
   print_tbl unvars;
-  print_string "defvars  :";
+  print_string "variables definies  :";
   print_tbl defvars;
-  (* if Vars.is_empty allvars then print_string "empty";*)
   ;;
-
-(*let rec union tab1 tab2 x =
-  match tab2 with 
-  |"" -> union tab1 tab2 x+1;
-  |(a,b) -> if Hashtbl.find tab1 x = a then  Hashtabl.replace defvars else union tab1 tab2 x+1;
-  *)

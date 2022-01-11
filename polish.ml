@@ -1,6 +1,3 @@
-open Printf
-
-(***********************************************************************)
 (* FONCTIONS DE READ POLISH*)
 (*découpe les fichiers en lignes et les met dans une int * string list. *)
 let rec add_lines input (no:int) lines  =
@@ -84,11 +81,11 @@ match line with
 |[]-> failwith "vide";
 ;;
 
-let parse_if lines =()
+let parse_if lines =() (*todo*)
 
 
 
-let rec parse_block lines no ind :Type.program * int=
+let rec parse_block lines no ind :Type.program * int= (*TODO : TROUVER STACK OVERFLOW*)
 
 if List.length lines <= 0 then [],no else 
 let rec parse_instr (no:int) (no2:int) :Type.block * int=
@@ -173,15 +170,13 @@ let rec parse_instr lines (no:int) =
 
 
 let usage () =
-  (*eval_polish abs;*) (*eval_polish factors;*) (*print_polish abs;*) (*print_polish factors;*)
-  Eval.vars_polish(Type.factors);;
-  
+  (*eval_polish Type.abs;*) (*eval_polish Type.factors;*) (*print_polish Type.abs;*) (*print_polish Type.factors;*)
+  (*Eval.vars_polish(Type.factors);; Veuillez decommenter ici pour tester l'option -vars*)() ;;
   let main () =
     match Sys.argv with
-    (*| [|_;"-reprint";file|] -> Reprint.print_polish (Type.abs)
-    | [|_;"-eval";file|] -> Eval.eval_polish (Type.abs)*)
-    | _ ->usage () 
-    
+    | [|_;"-reprint";file|] -> Reprint.print_polish (Type.abs)
+    | [|_;"-eval";file|] -> Eval.eval_polish (Type.abs)
+    | _ ->usage() ;
   ;;
   (* lancement de ce main *)
   let () = main ();;

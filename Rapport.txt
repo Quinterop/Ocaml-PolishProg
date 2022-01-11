@@ -3,15 +3,17 @@ SY Alassane 21956987 @sya
 BOUANEM Yani Akli21962029 @bouanem
 
 Fonctionnalités :
-Eval polish et Print polish(sans identation) sont fonctionnels
-et read polish est en WIP
+Eval_polish, Print_polish et l'option --vars sont fonctionnels
+et --simpl et read polish sont en WIP
 
 Compilation et exécution : dune build pour compiler
-Pour tester print_polish et eval_polish, veuillez decommenter la declaration des variables abs et factors (ligne 50/95)  et une des instruction de la ligne 300.
+Pour tester print_polish et eval_polish, veuillez decommenter la declaration des variables abs et factors (ligne 50/95) et
+ une des instruction de la ligne 300.
 
-découpage modulaire : TODO
+découpage modulaire : eval_polish et --vars dans eval.ml, read_polish dans polish.ml et print_polish dans reprint.ml
 
-Organisation du travail : participation des deux sur les deux fonctions avec séparation des sous-fonctions (voir commits)
+Organisation du travail : Nous avons tous les deux participé sur toutes les fonctionnalités du projet.
 
-Veuillez noter que comme nous en avons informé Mr Letouzey, notre binome a été formé le 14 decembre et donc trés tardivement.(Nous avons du changer de binôme vu que nos anciens binômes respectifs étaient injoignables depuis le début). Comme nous avons été en manque de temps, nous avons préféré faire eval_polish et print_polish au lieu read_polish car cette fontion nous semblait impossible à finir à temps.
-Nous avons cependant pu combiner ce que nous avions déja fait seuls pour read_polish avant de former notre binome mais celle-ci reste tout de même incomplète.
+*Veuillez noter que comme nous en avons informé Mr Letouzey, notre binome a été formé le 14 decembre et donc trés tardivement.
+(Nous avons du changer de binôme vu que nos anciens binômes respectifs étaient injoignables depuis le début).
+Comme nous avons été en manque de temps, nous avons préféré faire eval_polish et print_polish au lieu read_polish car cette fontion nous semblait impossible à finir à temps.

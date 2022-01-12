@@ -1,5 +1,4 @@
 (executable
  (name polish)
-  (modules polish reprint eval type)
-  (flags :standard -warn-error -A \ -short -path)
+ (flags :standard -w -27-26-32-33 \ -short-paths)
 )

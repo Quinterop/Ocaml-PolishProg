@@ -150,7 +150,7 @@ Hashtbl.iter (fun a b -> print_string (a^" ")) tab;
 print_newline();
 ;;
 
-let rec vars_polish p = 
+let vars_polish p = 
   (* let x = Hashtbl.replace "abc" allvars in ()*)
   let rec vars_block p =
     match p with

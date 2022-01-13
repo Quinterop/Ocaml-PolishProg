@@ -171,7 +171,9 @@ let rec parse_instr lines (no:int) =
 
 let usage () =
   (*eval_polish Type.abs;*) (*eval_polish Type.factors;*) (*print_polish Type.abs;*) (*print_polish Type.factors;*)
-  (*Eval.vars_polish(Type.factors);; Veuillez decommenter ici pour tester l'option -vars*)() ;;
+  (*Eval.vars_polish(Type.factors);; Veuillez decommenter ici pour tester l'option -vars*)
+  (*Reprint.print_polish (Reprint.simpl_polish Type.test)*)
+  () ;;
   let main () =
     match Sys.argv with
     | [|_;"-reprint";file|] -> Reprint.print_polish (Type.abs)
